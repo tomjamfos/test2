@@ -1,81 +1,95 @@
 import random
+import time
 
-# Story Generator - Creates a unique short story each time
+# Matrix Falling Rain Effect
 
-# Story components
-characters = [
-    "a weary detective", "a young programmer", "an old librarian",
-    "a mysterious stranger", "a curious child", "a retired astronaut"
-]
+def matrix_rain():
+    """Create a matrix-style falling rain effect for 30 seconds"""
 
-settings = [
-    "in a foggy city", "at an abandoned train station", "in a quiet coffee shop",
-    "on a remote island", "in a futuristic lab", "at midnight in the park"
-]
+    # Matrix characters (mix of katakana, numbers, and symbols)
+    chars = [
+        'ｱ', 'ｲ', 'ｳ', 'ｴ', 'ｵ', 'ｶ', 'ｷ', 'ｸ', 'ｹ', 'ｺ',
+        'ｻ', 'ｼ', 'ｽ', 'ｾ', 'ｿ', 'ﾀ', 'ﾁ', 'ﾂ', 'ﾃ', 'ﾄ',
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+        '@', '#', '$', '%', '&', '*', '+', '=', '|', ':'
+    ]
 
-conflicts = [
-    "discovered a hidden message", "found a glowing artifact",
-    "heard a strange melody", "noticed time was moving backwards",
-    "encountered their future self", "stumbled upon a secret door"
-]
+    # Terminal dimensions (approximate)
+    width = 80
+    height = 24
 
-twists = [
-    "it was all a dream within a dream", "they had been there before",
-    "nothing was as it seemed", "they were the one they were searching for",
-    "time looped back to the beginning", "the answer was in the question itself"
-]
+    # Initialize columns with random starting positions
+    columns = []
+    for i in range(width):
+        columns.append({
+            'y': random.randint(-height, 0),
+            'speed': random.choice([1, 2, 3]),
+            'chars': [random.choice(chars) for _ in range(height)]
+        })
 
-emotions = [
-    "fear", "wonder", "curiosity", "nostalgia", "hope", "confusion"
-]
+    start_time = time.time()
+    duration = 30  # seconds
 
-resolutions = [
-    "walked away with a smile", "understood everything at last",
-    "decided to start over", "kept the secret forever",
-    "chose to forget", "embraced the unknown"
-]
+    print("\033[2J")  # Clear screen
+    print("\033[?25l")  # Hide cursor
 
-def generate_story():
-    """Generate a random short story"""
-    character = random.choice(characters)
-    setting = random.choice(settings)
-    conflict = random.choice(conflicts)
-    emotion = random.choice(emotions)
-    twist = random.choice(twists)
-    resolution = random.choice(resolutions)
+    try:
+        while time.time() - start_time < duration:
+            # Clear screen and move cursor to top
+            print("\033[H", end='')
 
-    story = f"""
-{'='*60}
-                    THE RANDOM STORY
-{'='*60}
+            # Build the frame
+            frame = [[' ' for _ in range(width)] for _ in range(height)]
 
-Once, {character} found themselves {setting}.
+            # Update and draw each column
+            for col_idx, col in enumerate(columns):
+                # Move column down
+                col['y'] += col['speed']
 
-In a moment filled with {emotion}, they {conflict}.
+                # Reset if column is off screen
+                if col['y'] > height + 10:
+                    col['y'] = random.randint(-height, -1)
+                    col['speed'] = random.choice([1, 2, 3])
+                    col['chars'] = [random.choice(chars) for _ in range(height)]
 
-Everything changed when they realized that {twist}.
+                # Draw the column
+                for i in range(height):
+                    y_pos = col['y'] - i
+                    if 0 <= y_pos < height:
+                        # Brightest at the head
+                        if i == 0:
+                            frame[y_pos][col_idx] = f"\033[97m{col['chars'][i]}\033[0m"  # Bright white
+                        elif i < 3:
+                            frame[y_pos][col_idx] = f"\033[92m{col['chars'][i]}\033[0m"  # Bright green
+                        elif i < 8:
+                            frame[y_pos][col_idx] = f"\033[32m{col['chars'][i]}\033[0m"  # Green
+                        else:
+                            frame[y_pos][col_idx] = f"\033[2;32m{col['chars'][i]}\033[0m"  # Dim green
 
-In the end, they {resolution}.
+                # Randomly change some characters
+                if random.random() < 0.1:
+                    idx = random.randint(0, len(col['chars']) - 1)
+                    col['chars'][idx] = random.choice(chars)
 
-{'='*60}
-    """
-    return story
+            # Print the frame
+            for row in frame:
+                print(''.join(row))
 
-def main():
-    print("Welcome to the Story Generator!")
-    print("\nGenerating your unique story...\n")
+            time.sleep(0.05)  # Control speed
 
-    story = generate_story()
-    print(story)
+        # Show elapsed time message
+        print("\033[2J\033[H")  # Clear screen
+        print("\033[92m" + "="*60)
+        print(" " * 15 + "MATRIX RAIN COMPLETE")
+        print("="*60 + "\033[0m")
+        print(f"\nRan for {duration} seconds")
 
-    # Story statistics
-    total_possibilities = (
-        len(characters) * len(settings) * len(conflicts) *
-        len(emotions) * len(twists) * len(resolutions)
-    )
-
-    print(f"\nThis is one of {total_possibilities:,} possible stories!")
-    print("\nRun again for a different story.")
+    finally:
+        print("\033[?25h")  # Show cursor again
+        print("\033[0m")    # Reset colors
 
 if __name__ == "__main__":
-    main()
+    print("\033[92mStarting Matrix Rain Effect...\033[0m")
+    print("Running for 30 seconds...\n")
+    time.sleep(1)
+    matrix_rain()
