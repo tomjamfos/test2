@@ -192,11 +192,12 @@ class RacingGame:
     def __init__(self):
         self.track = RaceTrack()
         self.car = None
-        self.reset()
 
         # Sensor configuration (5 distance sensors)
         self.sensor_angles = [-60, -30, 0, 30, 60]  # Relative to car angle
         self.max_sensor_distance = 15
+
+        self.reset()
 
     def reset(self):
         """Reset the game"""
